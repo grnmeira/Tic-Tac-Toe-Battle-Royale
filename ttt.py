@@ -181,6 +181,9 @@ while not done:
                         50)
 
     # --- Go ahead and update the screen with what we've drawn.
+    font = pygame.font.Font(None, 30)
+    fps = font.render(str(int(clock.get_fps())), True, pygame.Color('grey'))
+    screen.blit(fps, (1, 1))
     pygame.display.flip()
 
     # --- Limit to 60 frames per second
