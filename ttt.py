@@ -25,6 +25,8 @@ class Game:
         self.player_turn = 1
         self.win_line = ()
         pygame.init()
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.Font(None, 30)
 
         # Set the WIDTH and HEIGHT of the screen [WIDTH, HEIGHT]
         screen_size = (510, 510)
@@ -92,36 +94,42 @@ class Game:
 
 
     def draw(self):
-        if self.on_win_screen:
-            return
-        # Here, we clear the screen to black. Don't put other drawing commands
-        # above this, or they will be erased with this command.
-        # If you want a background image, replace this clear with blit'ing the
-        # background image.
-        self.screen.fill(BLACK)
+        fps = self.font.render(str(int(self.clock.get_fps())), True, pygame.Color('grey'))
+        #self.screen.blit(fps, (1, 1))
+        #pygame.display.update(self.screen.blit(fps, (1, 1)))
 
-        color = WHITE
-        # --- Drawing code should go here
-        # pygame.draw.line(screen, WHITE, [0, 0], [0, 0+WIDTH], MARGIN)
-        for row in range(BOARD_SIZE):
-            for column in range(BOARD_SIZE):
-                if self.grid[row][column] == 1:
-                    color = GREEN
-                elif self.grid[row][column] == 2:
-                    color = RED
-                else:
-                    color = WHITE
+        if not self.on_win_screen:
 
-                pygame.draw.rect(
-                        self.screen,
-                        color,
-                        [(MARGIN+WIDTH) * column + MARGIN,  # left
-                            ((MARGIN + HEIGHT) * row) + MARGIN,  # top
-                            WIDTH,                          # WIDTH
-                            HEIGHT])                        # HEIGHT
+            # Here, we clear the screen to black. Don't put other drawing commands
+            # above this, or they will be erased with this command.
+            # If you want a background image, replace this clear with blit'ing the
+            # background image.
+            self.screen.fill(BLACK)
 
-        if self.win_line != ():
-            self.display_win_line()
+            color = WHITE
+            # --- Drawing code should go here
+            # pygame.draw.line(screen, WHITE, [0, 0], [0, 0+WIDTH], MARGIN)
+            for row in range(BOARD_SIZE):
+                for column in range(BOARD_SIZE):
+                    if self.grid[row][column] == 1:
+                        color = GREEN
+                    elif self.grid[row][column] == 2:
+                        color = RED
+                    else:
+                        color = WHITE
+
+                    pygame.draw.rect(
+                            self.screen,
+                            color,
+                            [(MARGIN+WIDTH) * column + MARGIN,  # left
+                                ((MARGIN + HEIGHT) * row) + MARGIN,  # top
+                                WIDTH,                          # WIDTH
+                                HEIGHT])                        # HEIGHT
+
+            if self.win_line != ():
+                self.display_win_line()
+            pygame.display.flip()
+        pygame.display.update(self.screen.blit(fps, (1, 1))) # TODO keep drawing fps updates but not rest of screen
 
 
     def display_win_line(self):
@@ -205,23 +213,15 @@ def playGame():
     # Loop until the user clicks the close button.
 
     # Used to manage how fast the screen updates
-    clock = pygame.time.Clock()
 
     # -------- Main Program Loop -----------
     while not game.done:
         # --- Main event loop
         game.process_events()
-        if not game.on_win_screen:
-            game.draw()
-
-        # --- Go ahead and update the screen with what we've drawn.
-        font = pygame.font.Font(None, 30)
-        fps = font.render(str(int(clock.get_fps())), True, pygame.Color('grey'))
-        game.screen.blit(fps, (1, 1))
-        pygame.display.flip()
+        game.draw()
 
         # --- Limit to 60 frames per second
-        clock.tick(60)
+        game.clock.tick(60)
 
     # Close the window and quit.
     pygame.quit()
