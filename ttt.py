@@ -19,8 +19,166 @@ RDIA = 4
 
 class Game:
     def __init__(self):
+        self.done = False
+        self.on_win_screen = False
         self.grid = init_grid(BOARD_SIZE)
         self.player_turn = 1
+        self.win_line = ()
+        pygame.init()
+
+        # Set the WIDTH and HEIGHT of the screen [WIDTH, HEIGHT]
+        screen_size = (510, 510)
+        self.screen = pygame.display.set_mode(screen_size)
+        pygame.display.set_caption("My Game")
+
+    def process_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (
+                event.type == pygame.KEYDOWN and (
+                    event.key == pygame.K_q)):
+                self.done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                # clicked_location = (pos[0], pos[1])
+                print(pos)
+                clicked_col = pos[0] // (MARGIN + WIDTH)
+                clicked_row = pos[1] // (MARGIN + HEIGHT)
+                # self.grid[clicked_row][clicked_col] = 1
+                if self.grid[clicked_row][clicked_col] == 0:
+                    self.grid[clicked_row][clicked_col] = self.player_turn
+                    
+                    self.check_for_win(clicked_row, clicked_col)
+
+                    if self.player_turn == 1:
+                        self.player_turn = 2
+                    else:
+                        self.player_turn = 1
+
+
+    def check_for_win(self, clicked_row, clicked_col):
+        print("Checking for win")
+        # Check row
+        for col in range(BOARD_SIZE):
+            if self.grid[clicked_row][col] != self.player_turn:
+                break
+            if col == BOARD_SIZE - 1:
+                self.win_line = (ROW, clicked_row, col)
+
+        # Check col
+        for row in range(BOARD_SIZE):
+            if self.grid[row][clicked_col] != self.player_turn:
+                break
+            if row == BOARD_SIZE - 1:
+                self.win_line = (COL, row, clicked_col)
+
+        # Check diag
+        if clicked_row == clicked_col:
+            for dia in range(BOARD_SIZE):
+                if self.grid[dia][dia] != self.player_turn:
+                    break
+                if dia == BOARD_SIZE - 1:
+                    self.win_line = (DIA, dia, dia)
+
+        # Check ainti/reverse diag
+        if (clicked_row + clicked_col) == (BOARD_SIZE - 1):
+            for dia in range(BOARD_SIZE):
+                if self.grid[dia][(BOARD_SIZE-1) - dia] != self.player_turn:
+                    break
+                if dia == BOARD_SIZE - 1:
+                    self.win_line = (RDIA, dia, dia)
+
+        if self.win_line != ():
+            print("WINNING LINE: %s" % (self.win_line, ))
+
+
+    def draw(self):
+        if self.on_win_screen:
+            return
+        # Here, we clear the screen to black. Don't put other drawing commands
+        # above this, or they will be erased with this command.
+        # If you want a background image, replace this clear with blit'ing the
+        # background image.
+        self.screen.fill(BLACK)
+
+        color = WHITE
+        # --- Drawing code should go here
+        # pygame.draw.line(screen, WHITE, [0, 0], [0, 0+WIDTH], MARGIN)
+        for row in range(BOARD_SIZE):
+            for column in range(BOARD_SIZE):
+                if self.grid[row][column] == 1:
+                    color = GREEN
+                elif self.grid[row][column] == 2:
+                    color = RED
+                else:
+                    color = WHITE
+
+                pygame.draw.rect(
+                        self.screen,
+                        color,
+                        [(MARGIN+WIDTH) * column + MARGIN,  # left
+                            ((MARGIN + HEIGHT) * row) + MARGIN,  # top
+                            WIDTH,                          # WIDTH
+                            HEIGHT])                        # HEIGHT
+
+        if self.win_line != ():
+            self.display_win_line()
+
+
+    def display_win_line(self):
+        print("Displaying winning line: %s" % (self.win_line, ))
+        if (self.win_line[0]) == ROW:
+            print("Winning line is a row")
+            pygame.draw.line(
+                    self.screen,
+                    BLACK,
+                    [
+                        0, 
+                        (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * self.win_line[1]
+                    ],
+                    [
+                        (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN,
+                        (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * self.win_line[1]
+                    ],
+                    50)
+        if (self.win_line[0]) == COL:
+            print("Winning line is a column")
+            pygame.draw.line(
+                    self.screen,
+                    BLACK,
+                    [
+                        (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * self.win_line[2], 
+                        0
+                    ],
+                    [   
+                        (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * self.win_line[2], 
+                        (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN
+                    ],
+                    50)
+        if (self.win_line[0]) == DIA:
+            print("Winning line is a diagonal")
+            pygame.draw.line(
+                    self.screen,
+                    BLACK,
+                    [0, 0],
+                    [
+                        (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 
+                        (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
+                    ],
+                    50)
+        if (self.win_line[0]) == RDIA:
+            print("Winning line is a reverse diagonal")
+            pygame.draw.line(
+                    self.screen,
+                    BLACK,
+                    [
+                        0, (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
+                    ],
+                    [    
+                        (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 0
+                    ],
+                    50)
+
+        self.on_win_screen = True
 
 
 def init_grid(size):
@@ -43,161 +201,23 @@ def main():
 
 def playGame():
     game = Game()
-    pygame.init()
-
-    # Set the WIDTH and HEIGHT of the screen [WIDTH, HEIGHT]
-    size = (510, 510)
-    screen = pygame.display.set_mode(size)
-
-    pygame.display.set_caption("My Game")
 
     # Loop until the user clicks the close button.
-    done = False
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
 
-
     # -------- Main Program Loop -----------
-    win_line = ()
-    while not done:
+    while not game.done:
         # --- Main event loop
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or (
-                event.type == pygame.KEYDOWN and (
-                    event.key == pygame.K_q)):
-                done = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                # clicked_location = (pos[0], pos[1])
-                print(pos)
-                clicked_col = pos[0] // (MARGIN + WIDTH)
-                clicked_row = pos[1] // (MARGIN + HEIGHT)
-                # game.grid[clicked_row][clicked_col] = 1
-                if game.grid[clicked_row][clicked_col] == 0:
-                    game.grid[clicked_row][clicked_col] = game.player_turn
-
-                    # Check row
-                    for col in range(BOARD_SIZE):
-                        if game.grid[clicked_row][col] != game.player_turn:
-                            break
-                        if col == BOARD_SIZE - 1:
-                            win_line = (ROW, clicked_row, col)
-
-                    # Check col
-                    for row in range(BOARD_SIZE):
-                        if game.grid[row][clicked_col] != game.player_turn:
-                            break
-                        if row == BOARD_SIZE - 1:
-                            win_line = (COL, row, clicked_col)
-
-                    # Check diag
-                    if clicked_row == clicked_col:
-                        for dia in range(BOARD_SIZE):
-                            if game.grid[dia][dia] != game.player_turn:
-                                break
-                            if dia == BOARD_SIZE - 1:
-                                win_line = (DIA, dia, dia)
-
-                    # Check ainti/reverse diag
-                    if (clicked_row + clicked_col) == (BOARD_SIZE - 1):
-                        for dia in range(BOARD_SIZE):
-                            if game.grid[dia][(BOARD_SIZE-1) - dia] != game.player_turn:
-                                break
-                            if dia == BOARD_SIZE - 1:
-                                win_line = (RDIA, dia, dia)
-
-                    print(win_line)
-
-                    if game.player_turn == 1:
-                        game.player_turn = 2
-                    else:
-                        game.player_turn = 1
-
-        # --- Game logic should go here
-
-        # --- Screen-clearing code goes here
-
-        # Here, we clear the screen to white. Don't put other drawing commands
-        # above this, or they will be erased with this command.
-
-        # If you want a background image, replace this clear with blit'ing the
-        # background image.
-        screen.fill(BLACK)
-
-        color = WHITE
-        # --- Drawing code should go here
-        # pygame.draw.line(screen, WHITE, [0, 0], [0, 0+WIDTH], MARGIN)
-        for row in range(BOARD_SIZE):
-            for column in range(BOARD_SIZE):
-                if game.grid[row][column] == 1:
-                    color = GREEN
-                elif game.grid[row][column] == 2:
-                    color = RED
-                else:
-                    color = WHITE
-
-                pygame.draw.rect(
-                        screen,
-                        color,
-                        [(MARGIN+WIDTH) * column + MARGIN,  # left
-                            ((MARGIN + HEIGHT) * row) + MARGIN,  # top
-                            WIDTH,                          # WIDTH
-                            HEIGHT])                        # HEIGHT
-
-        if win_line != ():
-            if (win_line[0]) == ROW:
-                    pygame.draw.line(
-                            screen,
-                            BLACK,
-                            [
-                                0, 
-                                (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * win_line[1]
-                            ],
-                            [
-                                (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN,
-                                (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * win_line[1]
-                            ],
-                            50)
-            if (win_line[0]) == COL:
-                    pygame.draw.line(
-                            screen,
-                            BLACK,
-                            [
-                                (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * win_line[2], 
-                                0
-                            ],
-                            [   
-                                (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * win_line[2], 
-                                (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN
-                            ],
-                            50)
-            if (win_line[0]) == DIA:
-                    pygame.draw.line(
-                            screen,
-                            BLACK,
-                            [0, 0],
-                            [
-                                (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 
-                                (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
-                            ],
-                            50)
-            if (win_line[0]) == RDIA:
-                    pygame.draw.line(
-                            screen,
-                            BLACK,
-                            [
-                                0, (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
-                            ],
-                            [    
-                                (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 0
-                            ],
-                            50)
+        game.process_events()
+        if not game.on_win_screen:
+            game.draw()
 
         # --- Go ahead and update the screen with what we've drawn.
         font = pygame.font.Font(None, 30)
         fps = font.render(str(int(clock.get_fps())), True, pygame.Color('grey'))
-        screen.blit(fps, (1, 1))
+        game.screen.blit(fps, (1, 1))
         pygame.display.flip()
 
         # --- Limit to 60 frames per second
