@@ -41,11 +41,9 @@ class Game:
                 self.done = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                # clicked_location = (pos[0], pos[1])
-                print(pos)
+                print("clicked: %s" %(pos,))
                 clicked_col = pos[0] // (MARGIN + WIDTH)
                 clicked_row = pos[1] // (MARGIN + HEIGHT)
-                # self.grid[clicked_row][clicked_col] = 1
                 if self.grid[clicked_row][clicked_col] == 0:
                     self.grid[clicked_row][clicked_col] = self.player_turn
                     
@@ -95,8 +93,6 @@ class Game:
 
     def draw(self):
         fps = self.font.render(str(int(self.clock.get_fps())), True, pygame.Color('grey'))
-        #self.screen.blit(fps, (1, 1))
-        #pygame.display.update(self.screen.blit(fps, (1, 1)))
 
         if not self.on_win_screen:
 
@@ -210,11 +206,8 @@ def main():
 def playGame():
     game = Game()
 
-    # Loop until the user clicks the close button.
-
-    # Used to manage how fast the screen updates
-
     # -------- Main Program Loop -----------
+    # Loop until the user clicks the close button.
     while not game.done:
         # --- Main event loop
         game.process_events()
