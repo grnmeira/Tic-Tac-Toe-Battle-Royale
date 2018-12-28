@@ -1,15 +1,18 @@
 import pygame
+import logging
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-
-WIDTH = 150
-HEIGHT = 150
-MARGIN = 15
+BLACK    = (0, 0, 0)
+WHITE    = (255, 255, 255)
+GREEN    = (0, 255, 0)
+RED      = (255, 0, 0)
+YELLOW   = (255, 255, 0)
 
 BOARD_SIZE = 3
+
+MARGIN = BOARD_SIZE *  4
+WIDTH  = MARGIN * 5
+HEIGHT = MARGIN * 5
+SCREEN_SIZE = (WIDTH * BOARD_SIZE) + ((BOARD_SIZE + 1) * MARGIN)
 
 ROW = 1
 COL = 2
@@ -29,7 +32,7 @@ class Game:
         self.font = pygame.font.Font(None, 30)
 
         # Set the WIDTH and HEIGHT of the screen [WIDTH, HEIGHT]
-        screen_size = (510, 510)
+        screen_size = (SCREEN_SIZE, SCREEN_SIZE)
         self.screen = pygame.display.set_mode(screen_size)
         pygame.display.set_caption("My Game")
 
@@ -134,7 +137,7 @@ class Game:
             print("Winning line is a row")
             pygame.draw.line(
                     self.screen,
-                    BLACK,
+                    YELLOW,
                     [
                         0, 
                         (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * self.win_line[1]
@@ -143,12 +146,12 @@ class Game:
                         (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN,
                         (MARGIN + HEIGHT//2) + (MARGIN + HEIGHT) * self.win_line[1]
                     ],
-                    50)
+                    MARGIN)
         if (self.win_line[0]) == COL:
             print("Winning line is a column")
             pygame.draw.line(
                     self.screen,
-                    BLACK,
+                    YELLOW,
                     [
                         (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * self.win_line[2], 
                         0
@@ -157,30 +160,30 @@ class Game:
                         (MARGIN + WIDTH//2) + (MARGIN + WIDTH) * self.win_line[2], 
                         (MARGIN+HEIGHT)*BOARD_SIZE + MARGIN
                     ],
-                    50)
+                    MARGIN)
         if (self.win_line[0]) == DIA:
             print("Winning line is a diagonal")
             pygame.draw.line(
                     self.screen,
-                    BLACK,
+                    YELLOW,
                     [0, 0],
                     [
                         (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 
                         (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
                     ],
-                    50)
+                    MARGIN)
         if (self.win_line[0]) == RDIA:
             print("Winning line is a reverse diagonal")
             pygame.draw.line(
                     self.screen,
-                    BLACK,
+                    YELLOW,
                     [
                         0, (MARGIN + HEIGHT)*BOARD_SIZE + MARGIN
                     ],
                     [    
                         (MARGIN + WIDTH)*BOARD_SIZE + MARGIN, 0
                     ],
-                    50)
+                    MARGIN)
 
         self.on_win_screen = True
 
