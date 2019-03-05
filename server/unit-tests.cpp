@@ -94,6 +94,16 @@ TEST(TTTBoard, win_on_rows)
     }
 }
 
+TEST(TTTBoard, x_wins_on_first_diagonal)
+{
+    TTTBoard board;
+
+    ASSERT_EQ(board.play(TTTBoard::Player::X, 0, 0), TTTBoard::PlayResult::NEXT_TURN);
+    ASSERT_EQ(board.play(TTTBoard::Player::O, 1, 0), TTTBoard::PlayResult::NEXT_TURN);
+    ASSERT_EQ(board.play(TTTBoard::Player::X, 1, 1), TTTBoard::PlayResult::NEXT_TURN);
+    ASSERT_EQ(board.play(TTTBoard::Player::O, 0, 2), TTTBoard::PlayResult::NEXT_TURN);
+    ASSERT_EQ(board.play(TTTBoard::Player::X, 2, 2), TTTBoard::PlayResult::WINNER);
+}
 
 
 int main(int argc, char **argv)

@@ -95,9 +95,14 @@ class TicTacToeBoard
             {
                 if(_board[0][row_index].is_in_use() &&
                    _board[0][row_index] == _board[1][row_index] &&
-                   _board[2][row_index] == _board[2][row_index])
+                   _board[1][row_index] == _board[2][row_index])
                     return PlayResult::WINNER;
             }
+
+            if(_board[0][0].is_in_use() &&
+               _board[0][0] == _board[1][1] &&
+               _board[1][1] == _board[2][2])
+                return PlayResult::WINNER;
 
             auto tiles_in_use = 0;
 
